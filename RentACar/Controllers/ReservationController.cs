@@ -140,7 +140,7 @@ public class ReservationController : Controller
         }
 
         // ===========================
-        // СТЪПКА 4: ПРОВЕРКА ЗА ЗАЕТОСТ ❗
+        // СТЪПКА 4: ПРОВЕРКА ЗА ЗАЕТОСТ
         // ===========================
 
         bool isBusy = await _context.Reservations
