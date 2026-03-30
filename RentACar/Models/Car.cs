@@ -10,7 +10,7 @@ namespace RentACar.Models
 
         [Required]
         [StringLength(50)]
-        public required string Make { get; set; }
+        public required string Brand { get; set; }
 
         [Required]
         [StringLength(50)]
@@ -36,5 +36,7 @@ namespace RentACar.Models
         [Column(TypeName = "decimal(18,2)")]
         [DataType(DataType.Currency)]
         public decimal DailyPrice { get; set; }
+
+        public ICollection<Reservation> Reservations { get; set; }
     }
 }

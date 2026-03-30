@@ -36,5 +36,6 @@ namespace RentACar.Models
         [Required]
         [EmailAddress]
         public required string Email { get; set; }
+        public ICollection<Reservation> Reservations { get; set; }
     }
 }
