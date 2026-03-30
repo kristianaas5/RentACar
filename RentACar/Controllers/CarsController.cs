@@ -39,7 +39,7 @@ public class CarsController : Controller
     public async Task<IActionResult> All()
     {
         var cars = await _context.Cars
-            .OrderBy(c => c.Make)
+            .OrderBy(c => c.Brand)
             .ThenBy(c => c.Model)
             .ToListAsync();
 
