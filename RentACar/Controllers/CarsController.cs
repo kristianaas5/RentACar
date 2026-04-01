@@ -122,7 +122,7 @@ public class CarsController : Controller
     [HttpPost]
     [ValidateAntiForgeryToken]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> Edit(int id, Car car)
+    public async Task<IActionResult> Edit(string id, Car car)
     {
         if (id != car.Id)
         {
