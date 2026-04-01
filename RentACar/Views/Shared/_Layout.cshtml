@@ -124,9 +124,10 @@
                         </li>
 
                         <li class="nav-item">
-                            <a class="nav-link" asp-controller="Account" asp-action="Logout">
-                                Logout
-                            </a>
+                            <form  asp-controller="Account" asp-action="Logout" method="post">
+                                @Html.AntiForgeryToken()
+                                <button class="nav-link" type="submit">Logout</button>
+                            </form>
                         </li>
                     }
                     else

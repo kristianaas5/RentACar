@@ -41,7 +41,7 @@ public class ReservationController : Controller
 
         // Намираме нашия User от таблицата
         var user = await _context.Users
-            .FirstOrDefaultAsync(u => u.Username == username);
+            .FirstOrDefaultAsync(u => u.UserName == username);
 
         if (user == null)
         {
@@ -132,7 +132,7 @@ public class ReservationController : Controller
         }
 
         var user = await _context.Users
-            .FirstOrDefaultAsync(u => u.Username == username);
+            .FirstOrDefaultAsync(u => u.UserName == username);
 
         if (user == null)
         {

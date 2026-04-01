@@ -16,8 +16,7 @@ namespace RentACar
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(connectionString));
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-            //opravi-Viktor
-            builder.Services.AddDefaultIdentity<IdentityUser>(options =>
+            builder.Services.AddDefaultIdentity<User>(options =>
             {
                 // Standard password settings   
                 options.Password.RequireDigit = true;       //Enquires at least one digit (0-9) in the password
@@ -89,8 +88,8 @@ namespace RentACar
             app.MapStaticAssets();
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}")
-                .WithStaticAssets();
+                pattern: "{controller=Home}/{action=Index}/{id?}");
+                //.WithStaticAssets();
             app.MapRazorPages()
                .WithStaticAssets();
 

@@ -18,7 +18,7 @@
 
                         <div class="col-md-6">
                             <div class="form-floating mb-3">
-                                <input asp-for="Username" class="form-control" placeholder="Username">
+                                <input asp-for="UserName" class="form-control" placeholder="Username">
                                 <label>Username</label>
                             </div>
                         </div>
@@ -61,7 +61,8 @@
                     </div>
 
                     <div class="form-floating mb-3">
-                        <input name="Password" type="password" class="form-control" placeholder="Password">
+                        <input asp-for="PasswordHash" type ="password" class="form-control" placeholder="Password" />
+                        @* <input name="Password" type="password" class="form-control" placeholder="Password"> *@
                         <label>Password</label>
                     </div>
 
