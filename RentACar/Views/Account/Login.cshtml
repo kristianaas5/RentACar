@@ -1,0 +1,35 @@
+﻿@{
+    ViewData["Title"] = "Login";
+}
+
+<div class="row justify-content-center align-items-center" style="min-height:70vh;">
+    <div class="col-md-5 col-lg-4">
+
+        <div class="card shadow border-0">
+            <div class="card-body p-4">
+
+                <h3 class="text-center mb-4 fw-bold">Sign In</h3>
+
+                <form asp-action="Login" method="post">
+
+                    <div class="form-floating mb-3">
+                        <input name="Username" class="form-control" placeholder="Username">
+                        <label>Username</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input name="Password" type="password" class="form-control" placeholder="Password">
+                        <label>Password</label>
+                    </div>
+
+                    <button type="submit" class="btn btn-dark w-100 py-2">
+                        Login
+                    </button>
+
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+</div>

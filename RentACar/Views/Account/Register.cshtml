@@ -1,0 +1,78 @@
+﻿@model RentACar.Models.User
+
+@{
+    ViewData["Title"] = "Register";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+
+        <div class="card shadow border-0">
+            <div class="card-body p-4">
+
+                <h3 class="text-center mb-4 fw-bold">Create Account</h3>
+
+                <form asp-action="Register" method="post">
+
+                    <div class="row">
+
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input asp-for="Username" class="form-control" placeholder="Username">
+                                <label>Username</label>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input asp-for="Email" class="form-control" placeholder="Email">
+                                <label>Email</label>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input asp-for="FirstName" class="form-control" placeholder="First Name">
+                                <label>First Name</label>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input asp-for="LastName" class="form-control" placeholder="Last Name">
+                                <label>Last Name</label>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input asp-for="EGN" class="form-control" placeholder="EGN">
+                        <label>EGN</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input asp-for="PhoneNumber" class="form-control" placeholder="Phone">
+                        <label>Phone Number</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input name="Password" type="password" class="form-control" placeholder="Password">
+                        <label>Password</label>
+                    </div>
+
+                    <button type="submit" class="btn btn-dark w-100 py-2">
+                        Register
+                    </button>
+
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+</div>

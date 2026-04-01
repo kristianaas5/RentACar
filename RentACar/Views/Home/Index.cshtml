@@ -1,8 +1,48 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
-}
+﻿<div class="text-center py-5">
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <h1 class="display-4 fw-bold mb-3">
+        Premium Car Rental Experience
+    </h1>
+
+    <p class="lead text-muted mb-4">
+        Choose from our luxury and economy vehicles at the best prices
+    </p>
+
+    <a asp-controller="Cars"
+       asp-action="All"
+       class="btn btn-primary btn-lg">
+        Browse Cars
+    </a>
+
+</div>
+
+<div class="row mt-5">
+
+    <div class="col-md-4">
+        <div class="card p-4 text-center">
+            <h4>🚗 Wide Selection</h4>
+            <p class="text-muted">
+                Economy, SUV, Luxury & Sports cars
+            </p>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card p-4 text-center">
+            <h4>💰 Best Prices</h4>
+            <p class="text-muted">
+                Competitive rental pricing
+            </p>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card p-4 text-center">
+            <h4>⚡ Fast Booking</h4>
+            <p class="text-muted">
+                Reserve your car in seconds
+            </p>
+        </div>
+    </div>
+
 </div>

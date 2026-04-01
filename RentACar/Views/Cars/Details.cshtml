@@ -1,0 +1,55 @@
+﻿@model RentACar.Models.Car
+
+@{
+    ViewData["Title"] = "Car Details";
+}
+
+<div class="row justify-content-center">
+
+    <div class="col-lg-8">
+
+        <div class="card shadow border-0">
+            <div class="card-body p-4">
+
+                <h2 class="fw-bold">
+                    @Model.Brand @Model.Model
+                </h2>
+
+                <div class="text-muted mb-3">
+                    @Model.Year • @Model.SeatingCapacity seats
+                </div>
+
+                <hr />
+
+                <p>
+                    @Model.Description
+                </p>
+
+                <div class="bg-light p-3 rounded mb-3">
+                    <h4 class="fw-bold mb-0">
+                        @Model.DailyPrice лв / ден
+                    </h4>
+                </div>
+
+                <div class="d-flex gap-2">
+
+                    <a asp-controller="Reservation"
+                       asp-action="Create"
+                       asp-route-carId="@Model.Id"
+                       class="btn btn-success">
+                        Reserve Car
+                    </a>
+
+                    <a asp-action="All"
+                       class="btn btn-outline-secondary">
+                        Back
+                    </a>
+
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+</div>
