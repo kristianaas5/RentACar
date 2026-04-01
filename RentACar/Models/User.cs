@@ -1,21 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
-
+using Microsoft.AspNetCore.Identity;
 namespace RentACar.Models
 {
-    public class User
+    public class User : IdentityUser
     {
-        // Primary key (useful for EF / persistence)
-        public int Id { get; set; }
-
-        [Required]
-        [StringLength(50)]
-        public required string Username { get; set; }
-
-        // Store a hashed password for security. Do not store plain text in production.
-        [Required]
-        [DataType(DataType.Password)]
-        public required string PasswordHash { get; set; }
-
         [Required]
         [StringLength(50)]
         public required string FirstName { get; set; }
@@ -28,14 +16,8 @@ namespace RentACar.Models
         [Required]
         [RegularExpression(@"^\d{10}$", ErrorMessage = "EGN must be exactly 10 digits.")]
         public required string EGN { get; set; }
-
-        [Phone]
-        [StringLength(20)]
-        public string? PhoneNumber { get; set; }
-
         [Required]
-        [EmailAddress]
-        public required string Email { get; set; }
-        public ICollection<Reservation> Reservations { get; set; }
+        public bool IsDeleted { get; set; }
+        public ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();
     }
 }

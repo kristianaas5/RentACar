@@ -6,7 +6,8 @@ namespace RentACar.Models
     public class Car
     {
         // Primary key for persistence
-        public int Id { get; set; }
+        [Required]
+        public string Id { get; set; } = Guid.NewGuid().ToString();
 
         [Required]
         [StringLength(50)]
@@ -35,8 +36,10 @@ namespace RentACar.Models
         [Range(0.01, 10000, ErrorMessage = "Daily price must be positive.")]
         [Column(TypeName = "decimal(18,2)")]
         [DataType(DataType.Currency)]
-        public decimal DailyPrice { get; set; }
+        public decimal DailyPrice { get; set; } = default(decimal);
+        [Required]
+        public bool IsDeleted { get; set; }
 
-        public ICollection<Reservation> Reservations { get; set; }
+        public ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();
     }
 }

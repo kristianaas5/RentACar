@@ -39,7 +39,7 @@ public class CarsController : Controller
     public async Task<IActionResult> All()
     {
         var cars = await _context.Cars
-            .OrderBy(c => c.Make)
+            .OrderBy(c => c.Brand)
             .ThenBy(c => c.Model)
             .ToListAsync();
 
@@ -122,7 +122,7 @@ public class CarsController : Controller
     [HttpPost]
     [ValidateAntiForgeryToken]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> Edit(int id, Car car)
+    public async Task<IActionResult> Edit(string id, Car car)
     {
         if (id != car.Id)
         {
