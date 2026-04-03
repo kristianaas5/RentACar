@@ -50,7 +50,7 @@ public class CarsController : Controller
     // DETAILS (Детайли)
     // ===========================
 
-    public async Task<IActionResult> Details(int? id)
+    public async Task<IActionResult> Details(string id)
     {
         if (id == null)
         {
@@ -102,7 +102,7 @@ public class CarsController : Controller
 
     [HttpGet]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> Edit(int? id)
+    public async Task<IActionResult> Edit(string id)
     {
         if (id == null)
         {
@@ -153,7 +153,7 @@ public class CarsController : Controller
 
     [HttpGet]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> Delete(int? id)
+    public async Task<IActionResult> Delete(string id)
     {
         if (id == null) return NotFound();
 
@@ -167,13 +167,14 @@ public class CarsController : Controller
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> DeleteConfirmed(int id)
+    public async Task<IActionResult> DeleteConfirmed(string id)
     {
         var car = await _context.Cars.FindAsync(id);
 
         if (car == null) return NotFound();
 
-        _context.Cars.Remove(car);
+        car.IsDeleted = true;
+
         await _context.SaveChangesAsync();
 
         return RedirectToAction(nameof(All));

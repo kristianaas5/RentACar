@@ -83,7 +83,7 @@ namespace RentACArTest1
             var options = CreateNewContextOptions(nameof(My_Returns_Reservations_For_User_Ordered));
             await using (var ctx = new ApplicationDbContext(options))
             {
-                var user = new User { Id = 1, Username = "u1", PasswordHash = "p", FirstName = "F", LastName = "L", EGN = "1234567890", Email = "a@b.com" };
+                var user = new User { Id = 1, UserName = "u1", PasswordHash = "p", FirstName = "F", LastName = "L", EGN = "1234567890", Email = "a@b.com" };
                 var car = new Car { Id = 1, Brand = "B", Model = "M", Year = 2000, SeatingCapacity = 4, DailyPrice = 10m };
                 ctx.Users.Add(user);
                 ctx.Cars.Add(car);

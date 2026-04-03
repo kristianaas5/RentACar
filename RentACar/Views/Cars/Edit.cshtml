@@ -1,0 +1,57 @@
+﻿@model RentACar.Models.Car
+
+@{
+    ViewData["Title"] = "Edit Car";
+}
+
+<h2>Edit Car</h2>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="Id" />
+
+    <div class="form-group">
+        <label asp-for="Brand"></label>
+        <input asp-for="Brand" class="form-control" />
+        <span asp-validation-for="Brand" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Model"></label>
+        <input asp-for="Model" class="form-control" />
+        <span asp-validation-for="Model" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Year"></label>
+        <input asp-for="Year" class="form-control" />
+        <span asp-validation-for="Year" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="SeatingCapacity"></label>
+        <input asp-for="SeatingCapacity" class="form-control" />
+        <span asp-validation-for="SeatingCapacity" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="DailyPrice"></label>
+        <input asp-for="DailyPrice" class="form-control" />
+        <span asp-validation-for="DailyPrice" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Description"></label>
+        <textarea asp-for="Description" class="form-control"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+
+    <div class="form-group form-check">
+        <input asp-for="IsDeleted" class="form-check-input" />
+        <label asp-for="IsDeleted" class="form-check-label"></label>
+    </div>
+
+    <br />
+
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>

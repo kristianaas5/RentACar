@@ -41,6 +41,19 @@
                            class="btn btn-dark">
                             View
                         </a>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <a asp-action="Edit"
+                               asp-route-id="@car.Id"
+                               class="btn btn-dark">
+                                Edit
+                            </a>
+                            <a asp-action="Delete"
+                               asp-route-id="@car.Id"
+                               class="btn btn-dark">
+                                Delete
+                            </a>
+                        }
 
                     </div>
 
