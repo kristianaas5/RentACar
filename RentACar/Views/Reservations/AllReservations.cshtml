@@ -1,0 +1,61 @@
+﻿@model IEnumerable<RentACar.Models.Reservation>
+
+@*
+    VIEW: All Reservations
+    Роля: Admin
+*@
+
+<h2 class="mb-4">📊 All Reservations</h2>
+
+<table class="table table-striped">
+
+    <thead>
+        <tr>
+            <th>User</th>
+            <th>Car</th>
+            <th>From</th>
+            <th>To</th>
+            <th></th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+        @foreach (var item in Model)
+        {
+            <tr>
+
+                <td>@item.User.UserName</td>
+
+                <td>
+                    @item.Car.Brand @item.Car.Model
+                </td>
+
+                <td>@item.StartDate.ToShortDateString()</td>
+                <td>@item.EndDate.ToShortDateString()</td>
+
+                <td>
+
+                    <form asp-action="Delete"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+                        <input type="hidden"
+                               name="id"
+                               value="@item.Id" />
+
+                        <button class="btn btn-sm btn-danger">
+                            Delete
+                        </button>
+
+                    </form>
+
+                </td>
+
+            </tr>
+        }
+
+    </tbody>
+
+</table>        

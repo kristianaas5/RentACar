@@ -1,82 +1,97 @@
 ﻿@model RentACar.Models.Car
 
 @*
-    VIEW: Edit Car
+    VIEW: Create Car
     Роля: Admin
     Описание:
-    - Редакция на съществуващ автомобил
-    - Зарежда данните в input полетата
+    - Създаване на нов автомобил
+    - Използва Bootstrap card layout
+    - Валидира полетата от Car Model
 *@
 
 <div class="row justify-content-center">
     <div class="col-lg-8">
 
+        @* Основна карта *@
         <div class="card shadow-lg">
 
-            <div class="card-header bg-warning">
-                <h4 class="mb-0">✏️ Edit Car</h4>
+            @* Header *@
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">➕ Add New Car</h4>
             </div>
 
+            @* Body *@
             <div class="card-body">
 
-                <form asp-action="Edit" method="post">
+                @* Форма за създаване *@
+                <form asp-action="Create" method="post">
 
                     @Html.AntiForgeryToken()
 
-                    @* Hidden Id *@
-                    <input type="hidden" asp-for="Id" />
-
+                    @* Validation summary *@
                     <div asp-validation-summary="ModelOnly"
                          class="text-danger mb-3"></div>
 
                     <div class="row">
 
+                        @* Brand *@
                         <div class="col-md-6 mb-3">
                             <label asp-for="Brand" class="form-label"></label>
                             <input asp-for="Brand" class="form-control" />
                             <span asp-validation-for="Brand" class="text-danger"></span>
                         </div>
 
+                        @* Model *@
                         <div class="col-md-6 mb-3">
                             <label asp-for="Model" class="form-label"></label>
                             <input asp-for="Model" class="form-control" />
                             <span asp-validation-for="Model" class="text-danger"></span>
                         </div>
 
+                        @* Year *@
                         <div class="col-md-4 mb-3">
-                            <label asp-for="Year"></label>
+                            <label asp-for="Year" class="form-label"></label>
                             <input asp-for="Year" class="form-control" />
                             <span asp-validation-for="Year" class="text-danger"></span>
                         </div>
 
+                        @* Seating Capacity *@
                         <div class="col-md-4 mb-3">
-                            <label asp-for="SeatingCapacity"></label>
+                            <label asp-for="SeatingCapacity" class="form-label"></label>
                             <input asp-for="SeatingCapacity" class="form-control" />
                             <span asp-validation-for="SeatingCapacity" class="text-danger"></span>
                         </div>
 
+                        @* Daily Price *@
                         <div class="col-md-4 mb-3">
-                            <label asp-for="DailyPrice"></label>
+                            <label asp-for="DailyPrice" class="form-label"></label>
                             <input asp-for="DailyPrice" class="form-control" />
                             <span asp-validation-for="DailyPrice" class="text-danger"></span>
                         </div>
 
                     </div>
 
+                    @* Description *@
                     <div class="mb-3">
-                        <label asp-for="Description"></label>
+                        <label asp-for="Description" class="form-label"></label>
                         <textarea asp-for="Description"
-                                  class="form-control"></textarea>
+                                  class="form-control"
+                                  rows="3"></textarea>
+                        <span asp-validation-for="Description"
+                              class="text-danger"></span>
                     </div>
 
+                    @* Бутони *@
                     <div class="d-flex justify-content-between">
 
-                        <a asp-action="All" class="btn btn-secondary">
+                        <a asp-action="All"
+                           class="btn btn-secondary">
                             ← Back
                         </a>
 
-                        <button type="submit" class="btn btn-warning">
-                            Update
+                        <button type="submit"
+                                class="btn btn-primary">
+                            Save Car
                         </button>
 
                     </div>
@@ -85,5 +100,6 @@
 
             </div>
         </div>
+
     </div>
 </div>

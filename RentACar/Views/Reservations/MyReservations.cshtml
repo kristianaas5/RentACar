@@ -1,0 +1,80 @@
+﻿@model IEnumerable<RentACar.Models.Reservation>
+
+@*
+    VIEW: My Reservations
+    Описание:
+    - Показва резервациите на логнатия user
+    - Card layout
+    - Status badge
+*@
+
+<h2 class="mb-4">📋 My Reservations</h2>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        You don't have any reservations yet.
+    </div>
+}
+
+<div class="row">
+
+    @foreach (var item in Model)
+    {
+        <div class="col-lg-4 col-md-6 mb-4">
+
+            <div class="card h-100 shadow-sm">
+
+                <div class="card-body">
+
+                    <h5 class="card-title">
+                        🚗 @item.Car.Brand @item.Car.Model
+                    </h5>
+
+                    <p class="text-muted">
+                        From:
+                        <strong>
+                            @item.StartDate.ToShortDateString()
+                        </strong>
+                    </p>
+
+                    <p class="text-muted">
+                        To:
+                        <strong>
+                            @item.EndDate.ToShortDateString()
+                        </strong>
+                    </p>
+
+                    @* Status badge *@
+                    @if (item.IsReserved)
+                    {
+                        <span class="badge bg-success">
+                            Active
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">
+                            Cancelled
+                        </span>
+                    }
+
+                </div>
+
+                <div class="card-footer bg-white">
+
+                    <a asp-controller="Cars"
+                       asp-action="Details"
+                       asp-route-id="@item.CarId"
+                       class="btn btn-sm btn-outline-primary w-100">
+                        View Car
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+    }
+
+</div>
