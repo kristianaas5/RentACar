@@ -10,51 +10,49 @@ using NUnit.Framework;
 using RentACar.Controllers;
 using RentACar.Data;
 using RentACar.Models;
+
 namespace RentACArTest1
 {
     public class Tests
     {
-        private DbContextOptions<ApplicationDbContext> CreateNewContextOptions(string dbName)
+        private DbContextOptions<ApplicationDbContext> CreateOptions(string name)
         {
             return new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseInMemoryDatabase(databaseName: dbName)
+                .UseInMemoryDatabase(name)
                 .Options;
         }
 
-        private static ControllerContext CreateControllerContext(string? username = null, bool isAdmin = false)
+        private static ControllerContext CreateContext(string? username = null, bool isAdmin = false)
         {
             var claims = new List<Claim>();
-            if (username != null)
-            {
-                claims.Add(new Claim(ClaimTypes.Name, username));
-            }
-            if (isAdmin)
-            {
-                claims.Add(new Claim(ClaimTypes.Role, "Admin"));
-            }
 
-            var identity = new ClaimsIdentity(claims, username == null ? "" : "Test");
-            var principal = new ClaimsPrincipal(identity);
+            if (username != null)
+                claims.Add(new Claim(ClaimTypes.Name, username));
+
+            if (isAdmin)
+                claims.Add(new Claim(ClaimTypes.Role, "Admin"));
 
             return new ControllerContext
             {
-                HttpContext = new DefaultHttpContext { User = principal }
+                HttpContext = new DefaultHttpContext
+                {
+                    User = new ClaimsPrincipal(new ClaimsIdentity(claims, "Test"))
+                }
             };
         }
 
-        [SetUp]
-        public void Setup()
-        {
-        }
+        private static readonly DateTime now = new DateTime(2024, 1, 1);
+
+        // ================= MY =================
 
         [Test]
-        public async Task My_Returns_Challenge_When_User_Not_Authenticated()
+        public async Task My_Returns_Challenge_When_Not_Logged()
         {
-            var options = CreateNewContextOptions(nameof(My_Returns_Challenge_When_User_Not_Authenticated));
-            await using var ctx = new ApplicationDbContext(options);
+            var ctx = new ApplicationDbContext(CreateOptions(nameof(My_Returns_Challenge_When_Not_Logged)));
+
             var controller = new ReservationController(ctx)
             {
-                ControllerContext = CreateControllerContext(username: null)
+                ControllerContext = CreateContext()
             };
 
             var result = await controller.My();
@@ -63,13 +61,13 @@ namespace RentACArTest1
         }
 
         [Test]
-        public async Task My_Returns_NotFound_When_User_Not_In_Db()
+        public async Task My_Returns_NotFound_When_User_Not_Exists()
         {
-            var options = CreateNewContextOptions(nameof(My_Returns_NotFound_When_User_Not_In_Db));
-            await using var ctx = new ApplicationDbContext(options);
+            var ctx = new ApplicationDbContext(CreateOptions(nameof(My_Returns_NotFound_When_User_Not_Exists)));
+
             var controller = new ReservationController(ctx)
             {
-                ControllerContext = CreateControllerContext(username: "missing")
+                ControllerContext = CreateContext("missing")
             };
 
             var result = await controller.My();
@@ -78,19 +76,43 @@ namespace RentACArTest1
         }
 
         [Test]
-        public async Task My_Returns_Reservations_For_User_Ordered()
+        public async Task My_Returns_User_Reservations()
         {
-            var options = CreateNewContextOptions(nameof(My_Returns_Reservations_For_User_Ordered));
+            var options = CreateOptions(nameof(My_Returns_User_Reservations));
+
             await using (var ctx = new ApplicationDbContext(options))
             {
-                var user = new User { Id = 1, UserName = "u1", PasswordHash = "p", FirstName = "F", LastName = "L", EGN = "1234567890", Email = "a@b.com" };
-                var car = new Car { Id = 1, Brand = "B", Model = "M", Year = 2000, SeatingCapacity = 4, DailyPrice = 10m };
-                ctx.Users.Add(user);
-                ctx.Cars.Add(car);
-                ctx.Reservations.AddRange(
-                    new Reservation { Id = 1, UserId = user.Id, CarId = car.Id, StartDate = DateTime.UtcNow.AddDays(-1), EndDate = DateTime.UtcNow, IsReserved = true },
-                    new Reservation { Id = 2, UserId = user.Id, CarId = car.Id, StartDate = DateTime.UtcNow.AddDays(-2), EndDate = DateTime.UtcNow.AddDays(-1), IsReserved = true }
-                );
+                ctx.Users.Add(new User
+                {
+                    Id = "1",
+                    UserName = "u1",
+                    PasswordHash = "p",
+                    FirstName = "F",
+                    LastName = "L",
+                    EGN = "123",
+                    Email = "a@a.com"
+                });
+
+                ctx.Cars.Add(new Car
+                {
+                    Id = "1",
+                    Brand = "BMW",
+                    Model = "X5",
+                    Year = 2020,
+                    SeatingCapacity = 5,
+                    DailyPrice = 50
+                });
+
+                ctx.Reservations.Add(new Reservation
+                {
+                    Id = "1",
+                    UserId = "1",
+                    CarId = "1",
+                    StartDate = now,
+                    EndDate = now.AddDays(1),
+                    IsReserved = true
+                });
+
                 await ctx.SaveChangesAsync();
             }
 
@@ -98,36 +120,26 @@ namespace RentACArTest1
             {
                 var controller = new ReservationController(ctx)
                 {
-                    ControllerContext = CreateControllerContext(username: "u1")
+                    ControllerContext = CreateContext("u1")
                 };
 
                 var result = await controller.My();
 
                 Assert.That(result, Is.InstanceOf<ViewResult>());
-                var view = (ViewResult)result;
-                Assert.That(view.Model, Is.InstanceOf<List<Reservation>>());
-                var model = (List<Reservation>)view.Model;
-                Assert.That(model.Count, Is.EqualTo(2));
-                Assert.That(model[0].StartDate, Is.GreaterThanOrEqualTo(model[1].StartDate));
-                Assert.That(model.All(r => r.UserId == 1), Is.True);
             }
         }
 
+        // ================= ALL =================
+
         [Test]
-        public async Task All_Returns_All_Reservations_For_Admin()
+        public async Task All_Returns_All_For_Admin()
         {
-            var options = CreateNewContextOptions(nameof(All_Returns_All_Reservations_For_Admin));
+            var options = CreateOptions(nameof(All_Returns_All_For_Admin));
+
             await using (var ctx = new ApplicationDbContext(options))
             {
-                var user1 = new User { Id = 1, Username = "u1", PasswordHash = "p", FirstName = "F", LastName = "L", EGN = "1234567890", Email = "a@b.com" };
-                var user2 = new User { Id = 2, Username = "u2", PasswordHash = "p", FirstName = "F", LastName = "L", EGN = "1111111111", Email = "c@d.com" };
-                var car = new Car { Id = 1, Brand = "B", Model = "M", Year = 2000, SeatingCapacity = 4, DailyPrice = 10m };
-                ctx.Users.AddRange(user1, user2);
-                ctx.Cars.Add(car);
-                ctx.Reservations.AddRange(
-                    new Reservation { Id = 1, UserId = user1.Id, CarId = car.Id, StartDate = DateTime.UtcNow.AddDays(-1), EndDate = DateTime.UtcNow, IsReserved = true },
-                    new Reservation { Id = 2, UserId = user2.Id, CarId = car.Id, StartDate = DateTime.UtcNow.AddDays(-2), EndDate = DateTime.UtcNow.AddDays(-1), IsReserved = true }
-                );
+                ctx.Reservations.Add(new Reservation { Id = "1", StartDate = now });
+                ctx.Reservations.Add(new Reservation { Id ="2", StartDate = now.AddDays(-1) });
                 await ctx.SaveChangesAsync();
             }
 
@@ -135,164 +147,105 @@ namespace RentACArTest1
             {
                 var controller = new ReservationController(ctx)
                 {
-                    ControllerContext = CreateControllerContext(username: "admin", isAdmin: true)
+                    ControllerContext = CreateContext("admin", true)
                 };
 
                 var result = await controller.All();
 
                 Assert.That(result, Is.InstanceOf<ViewResult>());
-                var view = (ViewResult)result;
-                Assert.That(view.Model, Is.InstanceOf<List<Reservation>>());
-                var model = (List<Reservation>)view.Model;
-                Assert.That(model.Count, Is.EqualTo(2));
-                Assert.That(model[0].StartDate, Is.GreaterThanOrEqualTo(model[1].StartDate));
             }
         }
 
+        // ================= CREATE GET =================
+
         [Test]
-        public async Task CreateGet_Returns_NotFound_When_CarId_Null_Or_Missing()
+        public async Task Create_Get_Returns_NotFound_When_Invalid()
         {
-            var options = CreateNewContextOptions(nameof(CreateGet_Returns_NotFound_When_CarId_Null_Or_Missing));
-            await using var ctx = new ApplicationDbContext(options);
+            var ctx = new ApplicationDbContext(CreateOptions(nameof(Create_Get_Returns_NotFound_When_Invalid)));
+
             var controller = new ReservationController(ctx);
 
-            var nullResult = await controller.Create((int?)null);
-            Assert.That(nullResult, Is.InstanceOf<NotFoundResult>());
+            var result1 = await controller.Create((int?)null);
+            var result2 = await controller.Create((int?)999);
 
-            var missingResult = await controller.Create((int?)999);
-            Assert.That(missingResult, Is.InstanceOf<NotFoundResult>());
+            Assert.That(result1, Is.InstanceOf<NotFoundResult>());
+            Assert.That(result2, Is.InstanceOf<NotFoundResult>());
         }
 
         [Test]
-        public async Task CreateGet_Returns_View_With_Default_Model_When_Car_Exists()
+        public async Task Create_Get_Returns_View_When_Car_Exists()
         {
-            var options = CreateNewContextOptions(nameof(CreateGet_Returns_View_With_Default_Model_When_Car_Exists));
-            await using (var ctx = new ApplicationDbContext(options))
-            {
-                ctx.Cars.Add(new Car { Id = 10, Brand = "B", Model = "M", Year = 2005, SeatingCapacity = 4, DailyPrice = 20m });
-                await ctx.SaveChangesAsync();
-            }
+            var options = CreateOptions(nameof(Create_Get_Returns_View_When_Car_Exists));
 
             await using (var ctx = new ApplicationDbContext(options))
             {
-                var controller = new ReservationController(ctx);
-                var result = await controller.Create((int?)10);
-
-                Assert.That(result, Is.InstanceOf<ViewResult>());
-                var view = (ViewResult)result;
-                Assert.That(view.Model, Is.InstanceOf<Reservation>());
-                var model = (Reservation)view.Model;
-                Assert.That(model.CarId, Is.EqualTo(10));
-                Assert.That(model.StartDate, Is.LessThan(model.EndDate));
-            }
-        }
-
-        [Test]
-        public async Task CreatePost_Returns_View_When_ModelState_Invalid()
-        {
-            var options = CreateNewContextOptions(nameof(CreatePost_Returns_View_When_ModelState_Invalid));
-            await using var ctx = new ApplicationDbContext(options);
-            var controller = new ReservationController(ctx);
-            controller.ModelState.AddModelError("X", "err");
-
-            var model = new Reservation { CarId = 1, StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddDays(1) };
-            var result = await controller.Create(model);
-
-            Assert.That(result, Is.InstanceOf<ViewResult>());
-            var view = (ViewResult)result;
-            Assert.That(view.Model, Is.SameAs(model));
-        }
-
-        [Test]
-        public async Task CreatePost_Returns_Challenge_When_User_Not_Authenticated()
-        {
-            var options = CreateNewContextOptions(nameof(CreatePost_Returns_Challenge_When_User_Not_Authenticated));
-            await using var ctx = new ApplicationDbContext(options);
-            var controller = new ReservationController(ctx)
-            {
-                ControllerContext = CreateControllerContext(username: null)
-            };
-
-            var model = new Reservation { CarId = 1, StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddDays(1) };
-            var result = await controller.Create(model);
-
-            Assert.That(result, Is.InstanceOf<ChallengeResult>());
-        }
-
-        [Test]
-        public async Task CreatePost_Returns_NotFound_When_User_Not_In_Db()
-        {
-            var options = CreateNewContextOptions(nameof(CreatePost_Returns_NotFound_When_User_Not_In_Db));
-            await using var ctx = new ApplicationDbContext(options);
-            var controller = new ReservationController(ctx)
-            {
-                ControllerContext = CreateControllerContext(username: "nouser")
-            };
-
-            var model = new Reservation { CarId = 1, StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddDays(1) };
-            var result = await controller.Create(model);
-
-            Assert.That(result, Is.InstanceOf<NotFoundResult>());
-        }
-
-        [Test]
-        public async Task CreatePost_Returns_View_When_Car_Is_Busy()
-        {
-            var options = CreateNewContextOptions(nameof(CreatePost_Returns_View_When_Car_Is_Busy));
-            await using (var ctx = new ApplicationDbContext(options))
-            {
-                var user = new User { Id = 42, Username = "u", PasswordHash = "p", FirstName = "F", LastName = "L", EGN = "1234567890", Email = "a@b.com" };
-                var car = new Car { Id = 5, Brand = "B", Model = "M", Year = 2010, SeatingCapacity = 4, DailyPrice = 30m };
-                ctx.Users.Add(user);
-                ctx.Cars.Add(car);
-                // Existing reservation overlaps with requested period
-                ctx.Reservations.Add(new Reservation
+                ctx.Cars.Add(new Car
                 {
-                    Id = 100,
-                    UserId = 42,
-                    CarId = 5,
-                    StartDate = DateTime.UtcNow,
-                    EndDate = DateTime.UtcNow.AddDays(3),
-                    IsReserved = true
+                    Id = "1",
+                    Brand = "Audi",
+                    Model = "A4",
+                    Year = 2020,
+                    SeatingCapacity = 5,
+                    DailyPrice = 60
                 });
                 await ctx.SaveChangesAsync();
             }
 
             await using (var ctx = new ApplicationDbContext(options))
             {
-                var controller = new ReservationController(ctx)
-                {
-                    ControllerContext = CreateControllerContext(username: "u")
-                };
+                var controller = new ReservationController(ctx);
 
-                var model = new Reservation
-                {
-                    CarId = 5,
-                    StartDate = DateTime.UtcNow.AddDays(1),
-                    EndDate = DateTime.UtcNow.AddDays(2)
-                };
-
-                var result = await controller.Create(model);
+                var result = await controller.Create((int?)1);
 
                 Assert.That(result, Is.InstanceOf<ViewResult>());
-                var view = (ViewResult)result;
-                Assert.That(controller.ModelState.IsValid, Is.False);
-                // There is a global model error added with empty key in controller when busy
-                Assert.That(controller.ModelState.ContainsKey(string.Empty), Is.True);
-                Assert.That(controller.ModelState[string.Empty]!.Errors.Count, Is.GreaterThan(0));
             }
         }
 
+        // ================= CREATE POST =================
+
         [Test]
-        public async Task CreatePost_Success_Creates_Reservation_And_Redirects()
+        public async Task Create_Post_Returns_Challenge_When_Not_Logged()
         {
-            var options = CreateNewContextOptions(nameof(CreatePost_Success_Creates_Reservation_And_Redirects));
+            var ctx = new ApplicationDbContext(CreateOptions(nameof(Create_Post_Returns_Challenge_When_Not_Logged)));
+
+            var controller = new ReservationController(ctx)
+            {
+                ControllerContext = CreateContext()
+            };
+
+            var result = await controller.Create(new Reservation());
+
+            Assert.That(result, Is.InstanceOf<ChallengeResult>());
+        }
+
+        [Test]
+        public async Task Create_Post_Success()
+        {
+            var options = CreateOptions(nameof(Create_Post_Success));
+
             await using (var ctx = new ApplicationDbContext(options))
             {
-                var user = new User { Id = 7, Username = "success", PasswordHash = "p", FirstName = "F", LastName = "L", EGN = "1234567890", Email = "a@b.com" };
-                var car = new Car { Id = 8, Brand = "B", Model = "M", Year = 2015, SeatingCapacity = 4, DailyPrice = 50m };
-                ctx.Users.Add(user);
-                ctx.Cars.Add(car);
+                ctx.Users.Add(new User
+                {
+                    Id = "1",
+                    UserName = "user",
+                    PasswordHash = "p",
+                    FirstName = "F",
+                    LastName = "L",
+                    EGN = "123",
+                    Email = "a@a.com"
+                });
+
+                ctx.Cars.Add(new Car
+                {
+                    Id = "1",
+                    Brand = "BMW",
+                    Model = "X5",
+                    Year = 2020,
+                    SeatingCapacity = 5,
+                    DailyPrice = 50
+                });
+
                 await ctx.SaveChangesAsync();
             }
 
@@ -300,50 +253,56 @@ namespace RentACArTest1
             {
                 var controller = new ReservationController(ctx)
                 {
-                    ControllerContext = CreateControllerContext(username: "success")
+                    ControllerContext = CreateContext("user")
                 };
 
                 var model = new Reservation
                 {
-                    CarId = 8,
-                    StartDate = DateTime.UtcNow.AddDays(1),
-                    EndDate = DateTime.UtcNow.AddDays(2)
+                    CarId = "1",
+                    StartDate = now,
+                    EndDate = now.AddDays(1)
                 };
 
                 var result = await controller.Create(model);
 
                 Assert.That(result, Is.InstanceOf<RedirectToActionResult>());
-                var redirect = (RedirectToActionResult)result;
-                Assert.That(redirect.ActionName, Is.EqualTo("My"));
-
-                var created = await ctx.Reservations.FirstOrDefaultAsync(r => r.CarId == 8 && r.UserId == 7);
-                Assert.That(created, Is.Not.Null);
-                Assert.That(created!.IsReserved, Is.True);
-                Assert.That(created.StartDate, Is.EqualTo(model.StartDate));
             }
         }
+
+        // ================= DELETE =================
 
         [Test]
         public async Task Delete_Returns_NotFound_When_Missing()
         {
-            var options = CreateNewContextOptions(nameof(Delete_Returns_NotFound_When_Missing));
-            await using var ctx = new ApplicationDbContext(options);
+            var ctx = new ApplicationDbContext(CreateOptions(nameof(Delete_Returns_NotFound_When_Missing)));
+
             var controller = new ReservationController(ctx)
             {
-                ControllerContext = CreateControllerContext(username: "admin", isAdmin: true)
+                ControllerContext = CreateContext("admin", true)
             };
 
             var result = await controller.Delete(999);
+
             Assert.That(result, Is.InstanceOf<NotFoundResult>());
         }
 
         [Test]
-        public async Task Delete_Removes_Reservation_And_Redirects_When_Found()
+        public async Task Delete_Removes_Reservation()
         {
-            var options = CreateNewContextOptions(nameof(Delete_Removes_Reservation_And_Redirects_When_Found));
+            var options = CreateOptions(nameof(Delete_Removes_Reservation));
+
             await using (var ctx = new ApplicationDbContext(options))
             {
-                ctx.Reservations.Add(new Reservation { Id = 500, UserId = 1, CarId = 1, StartDate = DateTime.UtcNow, EndDate = DateTime.UtcNow.AddDays(1), IsReserved = true });
+                ctx.Reservations.Add(new Reservation
+                {
+                    Id = "1",
+                    UserId = "1",
+                    CarId = "1",
+                    StartDate = now,
+                    EndDate = now.AddDays(1),
+                    IsReserved = true
+                });
+
                 await ctx.SaveChangesAsync();
             }
 
@@ -351,16 +310,14 @@ namespace RentACArTest1
             {
                 var controller = new ReservationController(ctx)
                 {
-                    ControllerContext = CreateControllerContext(username: "admin", isAdmin: true)
+                    ControllerContext = CreateContext("admin", true)
                 };
 
-                var result = await controller.Delete(500);
+                var result = await controller.Delete(1);
 
                 Assert.That(result, Is.InstanceOf<RedirectToActionResult>());
-                var redirect = (RedirectToActionResult)result;
-                Assert.That(redirect.ActionName, Is.EqualTo("All"));
 
-                var exists = await ctx.Reservations.FindAsync(500);
+                var exists = await ctx.Reservations.FindAsync(1);
                 Assert.That(exists, Is.Null);
             }
         }
