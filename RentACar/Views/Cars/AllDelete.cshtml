@@ -1,0 +1,69 @@
+﻿@model IEnumerable<RentACar.Models.Car>
+
+@*
+    VIEW: All Cars
+    Описание:
+    - Показва всички автомобили
+    - Admin вижда Edit/Delete бутони
+*@
+
+<h2 class="mb-4">🚗 Available Cars</h2>
+
+<div class="row">
+
+    @foreach (var car in Model)
+    {
+        <div class="col-lg-4 col-md-6 mb-4">
+
+            <div class="card h-100">
+
+                <div class="card-body">
+
+                    <h5 class="card-title">
+                        @car.Brand @car.Model
+                    </h5>
+
+                    <p class="text-muted">
+                        Year: @car.Year
+                    </p>
+
+                    <p>
+                        Seats: @car.SeatingCapacity
+                    </p>
+
+                    <span class="badge bg-success mb-2">
+                        $@car.DailyPrice / day
+                    </span>
+
+                    <p class="small text-muted">
+                        @car.Description
+                    </p>
+
+                </div>
+
+                <div class="card-footer bg-white">
+                    @* Admin бутони *@
+                    @if (User.IsInRole("Admin"))
+                    {
+
+
+                        <div class="d-flex justify-content-between">
+
+                            <a asp-action="Restore"
+                               asp-route-id="@car.Id"
+                               class="btn btn-sm btn-warning">
+                                Restore
+                            </a>
+
+
+                        </div>
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+    }
+
+</div>

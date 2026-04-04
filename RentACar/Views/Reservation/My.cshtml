@@ -44,6 +44,21 @@
                             @item.EndDate.ToShortDateString()
                         </strong>
                     </p>
+                    <p>
+                        Description:
+                            @item.Car.Description
+                    </p>
+                    <p class="text-muted">
+                        Seats:
+                        <strong>
+                            @item.Car.SeatingCapacity
+                        </strong>
+                        <p class ="text-muted">
+                        Total Price:
+                        <strong>
+                            $@(item.Car.DailyPrice * (item.EndDate - item.StartDate).Days)
+                        </strong>
+                    </p class="text-muted">
 
                     @* Status badge *@
                     @if (item.IsReserved)
@@ -58,17 +73,6 @@
                             Cancelled
                         </span>
                     }
-
-                </div>
-
-                <div class="card-footer bg-white">
-
-                    <a asp-controller="Cars"
-                       asp-action="Details"
-                       asp-route-id="@item.CarId"
-                       class="btn btn-sm btn-outline-primary w-100">
-                        View Car
-                    </a>
 
                 </div>
 

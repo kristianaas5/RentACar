@@ -78,23 +78,16 @@ public class ReservationController : Controller
     // ===========================
 
     [HttpGet]
-    public async Task<IActionResult> Create(int? carId)
+    public IActionResult Create(string carId)
     {
-        if (carId == null) return NotFound();
-
-        var car = await _context.Cars.FindAsync(carId);
-
-        if (car == null) return NotFound();
-
-        var model = new Reservation
+        var reservation = new Reservation
         {
-            CarId = car.Id,
-            StartDate = DateTime.Now,
-            EndDate = DateTime.Now.AddDays(1)
+            CarId = carId // 🔥 ТОВА Е КЛЮЧОВО
         };
 
-        return View(model);
+        return View(reservation);
     }
+
 
     [HttpPost]
     [ValidateAntiForgeryToken]
@@ -104,10 +97,10 @@ public class ReservationController : Controller
         // СТЪПКА 1: ВАЛИДАЦИЯ
         // ===========================
 
-        if (!ModelState.IsValid)
-        {
-            return View(model);
-        }
+        //if (!ModelState.IsValid)
+        //{
+        //    return View(model);
+        //}
 
         // ===========================
         // СТЪПКА 2: ДАТИ
@@ -186,7 +179,7 @@ public class ReservationController : Controller
     [HttpPost]
     [Authorize(Roles = "Admin")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Delete(int id)
+    public async Task<IActionResult> Delete(string id)
     {
         var reservation = await _context.Reservations.FindAsync(id);
 
@@ -194,8 +187,7 @@ public class ReservationController : Controller
         {
             return NotFound();
         }
-
-        _context.Reservations.Remove(reservation);
+        reservation.IsDeleted = true;
         await _context.SaveChangesAsync();
 
         return RedirectToAction(nameof(All));

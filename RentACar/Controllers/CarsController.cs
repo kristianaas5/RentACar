@@ -46,6 +46,36 @@ public class CarsController : Controller
         return View(cars);
     }
 
+    public async Task<IActionResult> AllDelete(string query)
+    {
+        var authorsQuery = _context.Cars
+            .IgnoreQueryFilters() // Include deleted authors
+            .Where(a => a.IsDeleted) // Only deleted authors
+            .OrderBy(a => a.Brand);
+        var models = await authorsQuery.ToListAsync();
+        return View(models);
+    }
+    [HttpGet]
+    public async Task<IActionResult> Restore(string id)
+    {
+        var author = await _context.Cars.IgnoreQueryFilters()
+            .Where(a => a.IsDeleted).FirstOrDefaultAsync(a => a.Id == id);
+        if (author == null) return NotFound();
+        return View(author);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Restore(Car model)
+    {
+        var author = await _context.Cars.IgnoreQueryFilters().FirstOrDefaultAsync(a => a.Id == model.Id);
+        if (author == null) return NotFound();
+
+        author.IsDeleted = false;
+        await _context.SaveChangesAsync();
+        return RedirectToAction(nameof(All), new { model.Id });
+    }
+
     // ===========================
     // DETAILS (Детайли)
     // ===========================
