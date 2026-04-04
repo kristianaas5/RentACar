@@ -2,10 +2,19 @@
 
 @*
     VIEW: My Reservations
-    Описание:
-    - Показва резервациите на логнатия user
-    - Card layout
-    - Status badge
+
+    Summary:
+    - Purpose: Displays the reservations belonging to the currently authenticated user.
+    - Model: IEnumerable<RentACar.Models.Reservation>
+    - UI: Card layout per reservation showing car (brand/model), start/end dates,
+      description, seating capacity, total price and a status badge (Active / Cancelled).
+    - Authorization & behavior: The controller action _ReservationController.My()_
+      obtains the current user, loads their reservations (includes Car), and returns this view.
+      The layout may hide the "My Reservations" link for Admin users; server-side checks remain in controller.
+    - Notes:
+      - Total price is computed as DailyPrice * number of days ((EndDate - StartDate).Days).
+      - Dates are rendered with ToShortDateString(); adjust timezone logic if needed.
+      - This file contains only presentation logic — validation and access control are handled by the controller.
 *@
 
 <h2 class="mb-4">📋 My Reservations</h2>

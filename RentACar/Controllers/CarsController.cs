@@ -7,12 +7,12 @@ using RentACar.Data;
 using RentACar.Models;
 
 /// <summary>
-/// Контролер за управление на автомобили
-/// Отговаря за:
-/// - Показване на всички коли
-/// - Създаване на нова кола (Admin)
-/// - Редакция (Admin)
-/// - Изтриване (Admin)
+/// Controller for managing cars.
+/// Responsibilities:
+/// - Show all cars
+/// - Create a new car (Admin)
+/// - Edit a car (Admin)
+/// - Soft-delete / restore cars (Admin)
 /// </summary>
 [Authorize]
 public class CarsController : Controller
@@ -23,6 +23,10 @@ public class CarsController : Controller
 
     private readonly ApplicationDbContext _context;
 
+    /// <summary>
+    /// Initialize a new instance of <see cref="CarsController"/>.
+    /// </summary>
+    /// <param name="context">Application database context.</param>
     public CarsController(ApplicationDbContext context)
     {
         _context = context;
@@ -34,8 +38,9 @@ public class CarsController : Controller
 
     /// <summary>
     /// GET: /Cars/All
-    /// Показва всички коли
+    /// Returns a view with all non-deleted cars ordered by brand and model.
     /// </summary>
+    /// <returns>A view result containing the list of cars.</returns>
     public async Task<IActionResult> All()
     {
         var cars = await _context.Cars
@@ -46,6 +51,11 @@ public class CarsController : Controller
         return View(cars);
     }
 
+    /// <summary>
+    /// Shows soft-deleted cars for administration.
+    /// </summary>
+    /// <param name="query">Optional query string (unused currently).</param>
+    /// <returns>A view with deleted cars.</returns>
     public async Task<IActionResult> AllDelete(string query)
     {
         var authorsQuery = _context.Cars
@@ -55,6 +65,13 @@ public class CarsController : Controller
         var models = await authorsQuery.ToListAsync();
         return View(models);
     }
+
+    /// <summary>
+    /// GET: /Cars/Restore/{id}
+    /// Returns the restore confirmation view for a soft-deleted car.
+    /// </summary>
+    /// <param name="id">Car identifier.</param>
+    /// <returns>NotFound if id is missing or car not found; otherwise the restore view.</returns>
     [HttpGet]
     public async Task<IActionResult> Restore(string id)
     {
@@ -64,6 +81,12 @@ public class CarsController : Controller
         return View(author);
     }
 
+    /// <summary>
+    /// POST: /Cars/Restore
+    /// Restores a previously soft-deleted car.
+    /// </summary>
+    /// <param name="model">Car model containing the Id to restore.</param>
+    /// <returns>Redirects to All on success or NotFound if the car does not exist.</returns>
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Restore(Car model)
@@ -80,6 +103,12 @@ public class CarsController : Controller
     // DETAILS (Детайли)
     // ===========================
 
+    /// <summary>
+    /// GET: /Cars/Details/{id}
+    /// Shows detailed information about a single car.
+    /// </summary>
+    /// <param name="id">Car identifier.</param>
+    /// <returns>NotFound if id missing or car not found; otherwise the details view.</returns>
     public async Task<IActionResult> Details(string id)
     {
         if (id == null)
@@ -101,6 +130,11 @@ public class CarsController : Controller
     // CREATE CAR (Admin only)
     // ===========================
 
+    /// <summary>
+    /// GET: /Cars/Create
+    /// Returns the create car form. Admin only.
+    /// </summary>
+    /// <returns>The create view.</returns>
     [HttpGet]
     [Authorize(Roles = "Admin")]
     public IActionResult Create()
@@ -108,6 +142,12 @@ public class CarsController : Controller
         return View();
     }
 
+    /// <summary>
+    /// POST: /Cars/Create
+    /// Persists a new car to the database. Admin only.
+    /// </summary>
+    /// <param name="car">Car model posted from the form.</param>
+    /// <returns>Returns to the create view when model state is invalid; redirects to All on success.</returns>
     [HttpPost]
     [ValidateAntiForgeryToken]
     [Authorize(Roles = "Admin")]
@@ -130,6 +170,12 @@ public class CarsController : Controller
     // EDIT CAR (Admin only)
     // ===========================
 
+    /// <summary>
+    /// GET: /Cars/Edit/{id}
+    /// Returns the edit form for a car. Admin only.
+    /// </summary>
+    /// <param name="id">Car identifier.</param>
+    /// <returns>NotFound if id missing or car not found; otherwise the edit view.</returns>
     [HttpGet]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Edit(string id)
@@ -149,6 +195,13 @@ public class CarsController : Controller
         return View(car);
     }
 
+    /// <summary>
+    /// POST: /Cars/Edit/{id}
+    /// Applies changes to an existing car. Admin only.
+    /// </summary>
+    /// <param name="id">Car id from the route.</param>
+    /// <param name="car">Car model with updated values.</param>
+    /// <returns>NotFound when ids mismatch or on error; returns edit view when model invalid; redirects to All on success.</returns>
     [HttpPost]
     [ValidateAntiForgeryToken]
     [Authorize(Roles = "Admin")]
@@ -181,6 +234,12 @@ public class CarsController : Controller
     // DELETE CAR (Admin only)
     // ===========================
 
+    /// <summary>
+    /// GET: /Cars/Delete/{id}
+    /// Shows delete confirmation for a car. Admin only.
+    /// </summary>
+    /// <param name="id">Car identifier.</param>
+    /// <returns>NotFound if id missing or car not found; otherwise the delete view.</returns>
     [HttpGet]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(string id)
@@ -194,6 +253,12 @@ public class CarsController : Controller
         return View(car);
     }
 
+    /// <summary>
+    /// POST: /Cars/Delete
+    /// Performs a soft delete of the car by setting IsDeleted = true. Admin only.
+    /// </summary>
+    /// <param name="id">Car identifier to delete.</param>
+    /// <returns>Redirects to the All action on success.</returns>
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
     [Authorize(Roles = "Admin")]

@@ -6,6 +6,11 @@ using RentACar.NewFolder;
 
 namespace RentACar.Controllers
 {
+    /// <summary>
+    /// Controller responsible for account related actions:
+    /// registration, login, logout and access denied handling.
+    /// Uses <see cref="UserManager{User}"/>, <see cref="SignInManager{User}"/> and <see cref="RoleManager{IdentityRole}"/>.
+    /// </summary>
     public class AccountController : Controller
     {
         private readonly UserManager<User> _userManager;// The UserManager is a service provided by ASP.NET Core Identity that allows us to manage user accounts, including creating users, validating credentials, and managing roles. By injecting UserManager<ApplicationUser> into the controller, we can perform operations related to user management, such as creating new users during registration and assigning roles to users.
@@ -13,7 +18,12 @@ namespace RentACar.Controllers
         private readonly RoleManager<IdentityRole> _roleManager;// The RoleManager is a service provided by ASP.NET Core Identity that allows us to manage roles in the application. By injecting RoleManager<IdentityRole> into the controller, we can create and manage roles, such as "Admin" and "User", which can be assigned to users to control access to different parts of the application based on their roles.
 
 
-        // The constructor of the AccountController class takes UserManager, SignInManager, and RoleManager as parameters and assigns them to private readonly fields. This allows us to use these services throughout the controller to manage user accounts, handle authentication, and manage roles as needed for registration, login, and access control functionalities.
+        /// <summary>
+        /// Creates a new instance of <see cref="AccountController"/>.
+        /// </summary>
+        /// <param name="userManager">Injected <see cref="UserManager{User}"/> instance.</param>
+        /// <param name="signInManager">Injected <see cref="SignInManager{User}"/> instance.</param>
+        /// <param name="roleManager">Injected <see cref="RoleManager{IdentityRole}"/> instance.</param>
         public AccountController(
             UserManager<User> userManager,
             SignInManager<User> signInManager,
@@ -23,7 +33,12 @@ namespace RentACar.Controllers
             _signInManager = signInManager;
             _roleManager = roleManager;
         }
-        // The Register action method with the HttpGet attribute is responsible for displaying the registration form to the user. It checks if the user is already authenticated, and if so, it redirects them to the home page. If the user is not authenticated, it returns the registration view where they can enter their details to create a new account.
+
+        /// <summary>
+        /// GET: /Account/Register
+        /// Displays the registration form. Redirects authenticated users to Home.
+        /// </summary>
+        /// <returns>Registration view or redirection to Home for authenticated users.</returns>
         [HttpGet]
         public IActionResult Register()
         {
@@ -37,7 +52,12 @@ namespace RentACar.Controllers
             return View();
         }
 
-        // The Register action method with the HttpPost attribute is responsible for processing the registration form submission. It first checks if the model state is valid, and if not, it returns the view with the model to display validation errors. It then checks if a user with the provided email already exists, and if so, it adds a model error and returns the view. If the email is unique, it creates a new ApplicationUser instance with the provided details and attempts to create the user using UserManager. If the creation is successful, it ensures that necessary roles are created, assigns the "User" role to the new user, signs them in, and redirects them to the home page. If there are errors during user creation, it adds those errors to the model state and returns the view to display them.
+        /// <summary>
+        /// POST: /Account/Register
+        /// Processes registration. Creates the user, ensures roles exist and signs in the new user.
+        /// </summary>
+        /// <param name="model">A <see cref="User"/> model containing registration data.</param>
+        /// <returns>Redirect to Home on success; returns the registration view with validation errors otherwise.</returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(User model)
@@ -91,7 +111,11 @@ namespace RentACar.Controllers
             return View(model);
         }
 
-        // The Login action method with the HttpGet attribute is responsible for displaying the login form to the user. It checks if the user is already authenticated, and if so, it redirects them to the home page. If the user is not authenticated, it returns the login view where they can enter their credentials to log in to their account.
+        /// <summary>
+        /// GET: /Account/Login
+        /// Displays the login form. Redirects authenticated users to Home.
+        /// </summary>
+        /// <returns>Login view or redirection to Home for authenticated users.</returns>
         [HttpGet]
         public IActionResult Login()
         {
@@ -103,8 +127,13 @@ namespace RentACar.Controllers
 
             return View();
         }
-        // The Login action method with the HttpPost attribute is responsible for processing the login form submission. It first checks if the model state is valid, and if not, it returns the view with the model to display validation errors. It then attempts to sign in the user using SignInManager with the provided username and password. If the sign-in is successful, it redirects the user to the home page. If the account is locked out due to multiple failed login attempts, it adds a model error indicating that the account is temporarily locked and returns the view. If the login attempt fails for any other reason, it adds a model error indicating invalid credentials and returns the view to display the error message.
 
+        /// <summary>
+        /// POST: /Account/Login
+        /// Attempts to sign in the user with the provided credentials.
+        /// </summary>
+        /// <param name="model">Login data in a <see cref="LoginViewModel"/> instance.</param>
+        /// <returns>Redirect to Home on success; returns login view with errors otherwise.</returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model)
@@ -139,7 +168,12 @@ namespace RentACar.Controllers
             ModelState.AddModelError(string.Empty, "Невалидно потребителско име или парола.");
             return View(model);
         }
-        // The Logout action method is responsible for signing out the currently authenticated user. It uses the SignInManager to sign out the user and then redirects them to the home page. The method is decorated with the Authorize attribute, which means that only authenticated users can access this action, and the ValidateAntiForgeryToken attribute, which helps protect against cross-site request forgery (CSRF) attacks by ensuring that a valid anti-forgery token is included in the request when logging out.
+
+        /// <summary>
+        /// POST: /Account/Logout
+        /// Signs out the current user.
+        /// </summary>
+        /// <returns>Redirect to Home after sign out.</returns>
         [Authorize]
         [ValidateAntiForgeryToken]
         [HttpPost]
@@ -150,14 +184,23 @@ namespace RentACar.Controllers
 
             return RedirectToAction("Index", "Home");
         }
-        // The AccessDenied action method is responsible for displaying an access denied view to users who attempt to access resources or perform actions that they are not authorized to access. This method is typically invoked when a user tries to access a restricted area of the application without the necessary permissions or roles. The method simply returns the AccessDenied view, which can be customized to inform the user that they do not have permission to access the requested resource or perform the desired action.
 
+        /// <summary>
+        /// GET: /Account/AccessDenied
+        /// Returns the AccessDenied view when a user tries to access a resource they are not authorized for.
+        /// </summary>
+        /// <returns>AccessDenied view.</returns>
         [HttpGet]
         public IActionResult AccessDenied()
         {
             return View();
         }
-        // The EnsureRolesCreated method is a private asynchronous method that checks if the necessary roles ("Admin" and "User") exist in the system, and if not, it creates them using the RoleManager. This method is called during user registration to ensure that the required roles are available before assigning a role to the newly registered user. By ensuring that the roles are created, we can maintain proper role-based access control in the application and avoid issues when trying to assign roles to users.
+
+        /// <summary>
+        /// Ensures the application roles exist ("Admin" and "User").
+        /// Creates missing roles using <see cref="RoleManager{IdentityRole}"/>.
+        /// </summary>
+        /// <returns>A task representing the asynchronous operation.</returns>
         private async Task EnsureRolesCreated()
         {
             // Check if the "Admin" role exists, and if not, create it using the RoleManager. This ensures that the "Admin" role is available in the system for assigning to users who need administrative privileges.

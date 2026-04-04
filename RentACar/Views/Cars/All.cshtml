@@ -51,12 +51,16 @@
                             Details
                         </a>
 
-                        <a asp-controller="Reservation"
-                           asp-action="Create"
-                           asp-route-carId="@car.Id"
-                           class="btn btn-sm btn-primary">
-                            Reserve
-                        </a>
+                        @* Only non-admin users may reserve *@
+                        @if (!User.IsInRole("Admin"))
+                        {
+                            <a asp-controller="Reservation"
+                               asp-action="Create"
+                               asp-route-carId="@car.Id"
+                               class="btn btn-sm btn-primary">
+                                Reserve
+                            </a>
+                        }
 
                     </div>
 

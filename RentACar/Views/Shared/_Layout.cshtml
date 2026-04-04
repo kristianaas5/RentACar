@@ -96,7 +96,8 @@
                         </li>
                     }
 
-                    @if (User.Identity.IsAuthenticated)
+                    @* Hide "My Reservations" for Admin users *@
+                    @if (User.Identity.IsAuthenticated && !User.IsInRole("Admin"))
                     {
                         <li class="nav-item">
                             <a class="nav-link" asp-controller="Reservation" asp-action="My">
